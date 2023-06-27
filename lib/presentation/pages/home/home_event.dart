@@ -17,3 +17,11 @@ final class OnClickFavoriteFactButtonEvent extends HomeEvent {
     required this.factUi,
   });
 }
+
+final class OnReceiveSearch extends HomeEvent {
+  final String search;
+
+  OnReceiveSearch({
+    required this.search,
+  });
+}
