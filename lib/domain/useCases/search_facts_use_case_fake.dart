@@ -11,15 +11,21 @@ class SearchFactsUseCaseFake extends SearchFactsUseCase {
     var facts = [
       Fact(
           description: "Combined with a handful of model sentence structures",
-          url: "https://url.com.br"
+          url: "https://url.com.br",
+          categories: ["Flamengo", "Vasco"],
+          isFavorite: true
       ),
       Fact(
           description: "Written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum",
-          url: "https://url.com.br"
+          url: "https://url.com.br",
+          categories: [],
+          isFavorite: false
       ),
       Fact(
           description: "Written in 45 aBC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum",
-          url: "https://url.com.br"
+          url: "https://url.com.br",
+          categories: ["Futebol", "Basquete"],
+          isFavorite: false
       )
     ];
 

@@ -4,6 +4,7 @@ import 'package:chuck_norris_facts/domain/models/search.dart';
 import 'package:chuck_norris_facts/domain/useCases/disfavor_fact_use_case.dart';
 import 'package:chuck_norris_facts/domain/useCases/favorite_fact_use_case.dart';
 import 'package:chuck_norris_facts/domain/useCases/search_facts_use_case.dart';
+import 'package:chuck_norris_facts/presentation/pages/home/extension/fact_extension.dart';
 import 'package:chuck_norris_facts/presentation/pages/home/home_event.dart';
 import 'package:chuck_norris_facts/presentation/pages/home/home_side_effect.dart';
 import 'package:chuck_norris_facts/presentation/pages/home/home_state.dart';
@@ -56,20 +57,22 @@ class HomeBloc extends SideEffectBloc<HomeEvent, HomeState, HomeSideEffect> {
   void _handleOnClickFavoriteFactButtonEvent(
       OnClickFavoriteFactButtonEvent event, Emitter<HomeState> emit) async {
     _toggleFavoriteFactUi(event.factUi, emit);
-    var currentFact = event.factUi;
+    var currentFactUi = event.factUi;
 
     Either<Failure, void> result;
-    if (currentFact.isFavorite) {
+    if (currentFactUi.isFavorite) {
       result = await _disfavorFactUseCase.call(
-          Fact(description: currentFact.description, url: currentFact.url));
+          currentFactUi.url
+      );
     } else {
       result = await _favoriteFactUseCase.call(
-          Fact(description: currentFact.description, url: currentFact.url));
+          currentFactUi.url
+      );
     }
 
     result.fold(
           (failure) => {
-            _toggleFavoriteFactUi(currentFact, emit)
+            _toggleFavoriteFactUi(currentFactUi, emit)
           },
           (facts) => {
             // nothing to do
@@ -103,12 +106,7 @@ class HomeBloc extends SideEffectBloc<HomeEvent, HomeState, HomeSideEffect> {
 
   void _onSearchFactsSuccessfully(List<Fact> facts, Emitter<HomeState> emit) {
     var factsUi = facts
-        .map((fact) => FactUi(
-            description: fact.description,
-            category: "categoria",
-            url: "minha url",
-            isLarge: true,
-            isFavorite: false))
+        .map((fact) => fact.toFactUi())
         .toList();
 
     emit(state.copyWith(facts: factsUi, content: HomeContent.listOfFacts));

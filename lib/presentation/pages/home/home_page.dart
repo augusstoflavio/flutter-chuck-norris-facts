@@ -45,7 +45,7 @@ class _HomePage extends StatelessWidget {
               onPressed: () => {
                     context
                         .read<HomeBloc>()
-                        .add(OnClickSearchButtonEvent())
+                        .add(OnReceiveSearchEvent(search: "sdasdasd"))
                   },
               icon: const Icon(Icons.search))
         ],
