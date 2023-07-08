@@ -7,3 +7,8 @@ class OpenSharedUrl extends HomeSideEffect {
     required this.url,
   });
 }
+
+class NavigateToSearchScreen extends HomeSideEffect {
+
+  NavigateToSearchScreen();
+}

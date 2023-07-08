@@ -18,10 +18,14 @@ final class OnClickFavoriteFactButtonEvent extends HomeEvent {
   });
 }
 
-final class OnReceiveSearch extends HomeEvent {
+final class OnReceiveSearchEvent extends HomeEvent {
   final String search;
 
-  OnReceiveSearch({
+  OnReceiveSearchEvent({
     required this.search,
   });
+}
+
+final class OnClickSearchButtonEvent extends HomeEvent {
+  OnClickSearchButtonEvent();
 }
