@@ -1,4 +1,5 @@
 import 'package:chuck_norris_facts/presentation/pages/home/home_page.dart';
+import 'package:chuck_norris_facts/presentation/pages/searchFacts/search_facts_page.dart';
 import 'package:flutter/material.dart';
 
 class ChuckNorrisFactsApp extends StatelessWidget {
@@ -13,7 +14,11 @@ class ChuckNorrisFactsApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      routes: {
+        '/': (context) => const HomePage(),
+        '/fact/search': (context) => const SearchFactsPage(),
+      },
+      initialRoute: '/'
     );
   }
 }
