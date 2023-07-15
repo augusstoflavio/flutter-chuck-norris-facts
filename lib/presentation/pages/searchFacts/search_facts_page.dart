@@ -6,6 +6,7 @@ import 'package:chuck_norris_facts/presentation/pages/searchFacts/search_facts_s
 import 'package:chuck_norris_facts/presentation/pages/searchFacts/search_facts_state.dart';
 import 'package:chuck_norris_facts/presentation/pages/searchFacts/widget/search_facts_last_searches.dart';
 import 'package:chuck_norris_facts/presentation/pages/searchFacts/widget/search_facts_suggestions.dart';
+import 'package:chuck_norris_facts/presentation/widget/failure_dialog_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -20,8 +21,9 @@ class SearchFactsPage extends StatelessWidget {
 
     return BlocProvider(
       create: (_) => SearchFactsBloc(
-          getIt<GetLastSearchesUseCase>(), getIt<GetRandomSuggestionsUseCase>())
-        ..add(OnInitScreen()),
+        getIt<GetLastSearchesUseCase>(),
+        getIt<GetRandomSuggestionsUseCase>(),
+      )..add(OnInitScreen()),
       child: const _SearchFactsPage(),
     );
   }
@@ -35,17 +37,21 @@ class _SearchFactsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: const Text("Buscar fatos")
-      ),
+          title: const Text("Buscar fatos")),
       body: BlocSideEffectListener<SearchFactsBloc, SearchFactsSideEffect>(
         listener: (BuildContext context, SearchFactsSideEffect sideEffect) {
+          var bloc = context.read<SearchFactsBloc>();
+
           switch (sideEffect) {
             case NavigateToPreviousScreenWithSearch():
               {
                 Navigator.pop(context, sideEffect.search);
               }
-            case ShowDialogError():
-              {}
+            case ShowFailureDialog():
+              {
+                context.buildFailureDialog(sideEffect.failure,
+                    () => bloc.add(sideEffect.tryAgainEvent));
+              }
           }
         },
         child: BlocBuilder<SearchFactsBloc, SearchFactsState>(

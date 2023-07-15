@@ -52,7 +52,10 @@ class SearchFactsBloc  extends SideEffectBloc<SearchFactsEvent, SearchFactsState
     emit(state.copyWith(showLoadingSuggestions: false));
 
     produceSideEffect(
-        ShowDialogError(error: "Problema ao consultar as sugestoes")
+        ShowFailureDialog(
+          failure: failure,
+          tryAgainEvent: OnClickTryAgainSuggestionsEvent(),
+        )
     );
   }
 
@@ -82,7 +85,10 @@ class SearchFactsBloc  extends SideEffectBloc<SearchFactsEvent, SearchFactsState
     emit(state.copyWith(showLoadingLastSearches: false));
 
     produceSideEffect(
-        ShowDialogError(error: "Problema ao consultar as ultimas buscas")
+        ShowFailureDialog(
+            failure: failure,
+            tryAgainEvent: OnClickTryAgainGetLastSearchesEvent(),
+        )
     );
   }
 

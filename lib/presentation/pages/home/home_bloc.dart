@@ -99,7 +99,15 @@ class HomeBloc extends SideEffectBloc<HomeEvent, HomeState, HomeSideEffect> {
     var factsResult =
         await _searchFactsUseCase.call(Search(description: search));
     factsResult.fold(
-      (failure) => {emit(state.copyWith(content: HomeContent.loading))},
+      (failure) {
+        emit(state.copyWith(content: HomeContent.listOfFacts));
+        produceSideEffect(
+            ShowFailureDialog(
+              failure: failure,
+              tryAgainEvent: OnClickTryAgainEvent(search: search),
+            )
+        );
+      },
       (facts) => {_onSearchFactsSuccessfully(facts, emit)},
     );
   }

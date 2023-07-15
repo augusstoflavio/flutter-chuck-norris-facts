@@ -20,3 +20,13 @@ final class OnSearch extends SearchFactsEvent {
     required this.search,
   });
 }
+
+final class OnClickTryAgainGetLastSearchesEvent extends SearchFactsEvent {
+
+  OnClickTryAgainGetLastSearchesEvent();
+}
+
+final class OnClickTryAgainSuggestionsEvent extends SearchFactsEvent {
+
+  OnClickTryAgainSuggestionsEvent();
+}

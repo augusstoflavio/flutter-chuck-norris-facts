@@ -1,3 +1,6 @@
+import 'package:chuck_norris_facts/domain/models/failure.dart';
+import 'package:chuck_norris_facts/presentation/pages/searchFacts/search_facts_event.dart';
+
 sealed class SearchFactsSideEffect {}
 
 class NavigateToPreviousScreenWithSearch extends SearchFactsSideEffect {
@@ -8,10 +11,12 @@ class NavigateToPreviousScreenWithSearch extends SearchFactsSideEffect {
   });
 }
 
-class ShowDialogError extends SearchFactsSideEffect {
-  final String error;
+class ShowFailureDialog extends SearchFactsSideEffect {
+  final Failure failure;
+  final SearchFactsEvent tryAgainEvent;
 
-  ShowDialogError({
-    required this.error,
+  ShowFailureDialog({
+    required this.failure,
+    required this.tryAgainEvent,
   });
 }

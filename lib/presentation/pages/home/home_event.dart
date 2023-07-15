@@ -26,6 +26,14 @@ final class OnReceiveSearchEvent extends HomeEvent {
   });
 }
 
+final class OnClickTryAgainEvent extends HomeEvent {
+  final String search;
+
+  OnClickTryAgainEvent({
+    required this.search,
+  });
+}
+
 final class OnClickSearchButtonEvent extends HomeEvent {
   OnClickSearchButtonEvent();
 }

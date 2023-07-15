@@ -1,3 +1,4 @@
+import 'package:chuck_norris_facts/domain/models/failure.dart';
 import 'package:chuck_norris_facts/domain/useCases/disfavor_fact_use_case.dart';
 import 'package:chuck_norris_facts/domain/useCases/favorite_fact_use_case.dart';
 import 'package:chuck_norris_facts/domain/useCases/search_facts_use_case.dart';
@@ -7,6 +8,7 @@ import 'package:chuck_norris_facts/presentation/pages/home/home_side_effect.dart
 import 'package:chuck_norris_facts/presentation/pages/home/home_state.dart';
 import 'package:chuck_norris_facts/presentation/pages/home/widget/fact_center_text.dart';
 import 'package:chuck_norris_facts/presentation/pages/home/widget/facts_list.dart';
+import 'package:chuck_norris_facts/presentation/widget/failure_dialog_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -56,7 +58,11 @@ class _HomePage extends StatelessWidget {
   }
 
   void _handleSideEffect(
-      BuildContext context, HomeSideEffect sideEffect) async {
+    BuildContext context,
+    HomeSideEffect sideEffect,
+  ) async {
+    var bloc = context.read<HomeBloc>();
+
     switch (sideEffect) {
       case OpenSharedUrl():
         {
@@ -64,17 +70,17 @@ class _HomePage extends StatelessWidget {
         }
       case NavigateToSearchScreen():
         {
-          await PlatformAlertDialog(
-            error.title,
-            error.message,
-          ).show(context);
-
-
-          var bloc = context.read<HomeBloc>();
           var resultSearch = await Navigator.pushNamed(context, '/fact/search');
           if (resultSearch != null) {
             bloc.add(OnReceiveSearchEvent(search: resultSearch as String));
           }
+        }
+      case ShowFailureDialog():
+        {
+          context.buildFailureDialog(
+            sideEffect.failure,
+            () => bloc.add(sideEffect.tryAgainEvent),
+          );
         }
     }
   }
