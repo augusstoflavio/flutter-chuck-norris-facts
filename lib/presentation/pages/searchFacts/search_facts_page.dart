@@ -20,9 +20,8 @@ class SearchFactsPage extends StatelessWidget {
 
     return BlocProvider(
       create: (_) => SearchFactsBloc(
-          getIt<GetLastSearchesUseCase>(),
-          getIt<GetRandomSuggestionsUseCase>()
-      )..add(OnInitScreen()),
+          getIt<GetLastSearchesUseCase>(), getIt<GetRandomSuggestionsUseCase>())
+        ..add(OnInitScreen()),
       child: const _SearchFactsPage(),
     );
   }
@@ -35,12 +34,19 @@ class _SearchFactsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Buscar fatos")
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text("Buscar fatos")
       ),
       body: BlocSideEffectListener<SearchFactsBloc, SearchFactsSideEffect>(
         listener: (BuildContext context, SearchFactsSideEffect sideEffect) {
-
+          switch (sideEffect) {
+            case NavigateToPreviousScreenWithSearch():
+              {
+                Navigator.pop(context, sideEffect.search);
+              }
+            case ShowDialogError():
+              {}
+          }
         },
         child: BlocBuilder<SearchFactsBloc, SearchFactsState>(
           builder: (context, state) {
@@ -55,6 +61,7 @@ class _SearchFactsPage extends StatelessWidget {
 
   List<Widget> _getContent(BuildContext context, SearchFactsState state) {
     var theme = Theme.of(context);
+    var bloc = context.read<SearchFactsBloc>();
 
     List<Widget> stackChildren = [
       SingleChildScrollView(
@@ -63,12 +70,13 @@ class _SearchFactsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const TextField(
-                decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search),
-                    labelText: "Digite sua busca"
-                ),
-              ),
+              TextField(
+                  decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                      labelText: "Digite sua busca"),
+                  onSubmitted: (search) {
+                    bloc.add(OnSearch(search: search));
+                  }),
               const SizedBox(
                 height: 16.0,
               ),
@@ -76,7 +84,12 @@ class _SearchFactsPage extends StatelessWidget {
               const SizedBox(
                 height: 8.0,
               ),
-              SearchFactsSuggestions(suggestions: state.suggestions),
+              SearchFactsSuggestions(
+                suggestions: state.suggestions,
+                onClickSuggestion: (suggestion) {
+                  bloc.add(OnClickSuggestion(suggestion: suggestion));
+                },
+              ),
               const SizedBox(
                 height: 16.0,
               ),
@@ -84,7 +97,12 @@ class _SearchFactsPage extends StatelessWidget {
               const SizedBox(
                 height: 8.0,
               ),
-              SearchFactsLastSearches(lastSearches: state.lastSearches)
+              SearchFactsLastSearches(
+                lastSearches: state.lastSearches,
+                onClickLastSearch: (search) {
+                  bloc.add(OnClickLastSearch(lastSearch: search));
+                },
+              )
             ],
           ),
         ),
@@ -92,11 +110,9 @@ class _SearchFactsPage extends StatelessWidget {
     ];
 
     if (state.showLoadingLastSearches || state.showLoadingSuggestions) {
-      stackChildren.add(
-          const Center(
-            child: CircularProgressIndicator(),
-          )
-      );
+      stackChildren.add(const Center(
+        child: CircularProgressIndicator(),
+      ));
     }
 
     return stackChildren;

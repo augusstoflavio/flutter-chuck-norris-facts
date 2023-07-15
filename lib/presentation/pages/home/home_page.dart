@@ -21,11 +21,8 @@ class HomePage extends StatelessWidget {
     final getIt = GetIt.instance;
 
     return BlocProvider(
-      create: (_) => HomeBloc(
-          getIt<SearchFactsUseCase>(),
-          getIt<DisfavorFactUseCase>(),
-          getIt<FavoriteFactUseCase>()
-      ),
+      create: (_) => HomeBloc(getIt<SearchFactsUseCase>(),
+          getIt<DisfavorFactUseCase>(), getIt<FavoriteFactUseCase>()),
       child: const _HomePage(),
     );
   }
@@ -48,42 +45,61 @@ class _HomePage extends StatelessWidget {
         ],
       ),
       body: BlocSideEffectListener<HomeBloc, HomeSideEffect>(
-          listener: (BuildContext context, HomeSideEffect sideEffect) {
-        switch (sideEffect) {
-          case OpenSharedUrl():
-            {
-              Share.share(sideEffect.url);
-            }
-          case NavigateToSearchScreen():
-            {
-              Navigator.pushNamed(context, '/fact/search');
-            }
-        }
-      }, child: BlocBuilder<HomeBloc, HomeState>(
-        builder: (context, state) {
-          switch (state.content) {
-            case HomeContent.loading:
-              return const CircularProgressIndicator();
-            case HomeContent.listOfFacts:
-              return FactsList(
-                  facts: state.facts,
-                  onClickSharedButton: (factUi) => {
-                        context
-                            .read<HomeBloc>()
-                            .add(OnClickSharedFactButtonEvent(factUi: factUi))
-                      },
-                  onClickFavoriteButton: (factUi) => {
-                        context
-                            .read<HomeBloc>()
-                            .add(OnClickFavoriteFactButtonEvent(factUi: factUi))
-                      });
-            case HomeContent.messageToSearchFact:
-              return const FactCenterText(text: "Busque um fato");
-            case HomeContent.messageNoFactFound:
-              return const FactCenterText(text: "Fatos nao encontrados");
-          }
-        },
-      )), // This trailing comma makes auto-formatting nicer for build methods.
+        listener: _handleSideEffect,
+        child: BlocBuilder<HomeBloc, HomeState>(
+          builder: (context, state) {
+            return _getContent(context, state);
+          },
+        ),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  void _handleSideEffect(
+      BuildContext context, HomeSideEffect sideEffect) async {
+    switch (sideEffect) {
+      case OpenSharedUrl():
+        {
+          Share.share(sideEffect.url);
+        }
+      case NavigateToSearchScreen():
+        {
+          await PlatformAlertDialog(
+            error.title,
+            error.message,
+          ).show(context);
+
+
+          var bloc = context.read<HomeBloc>();
+          var resultSearch = await Navigator.pushNamed(context, '/fact/search');
+          if (resultSearch != null) {
+            bloc.add(OnReceiveSearchEvent(search: resultSearch as String));
+          }
+        }
+    }
+  }
+
+  Widget _getContent(BuildContext context, HomeState state) {
+    switch (state.content) {
+      case HomeContent.loading:
+        return const CircularProgressIndicator();
+      case HomeContent.listOfFacts:
+        return FactsList(
+            facts: state.facts,
+            onClickSharedButton: (factUi) => {
+                  context
+                      .read<HomeBloc>()
+                      .add(OnClickSharedFactButtonEvent(factUi: factUi))
+                },
+            onClickFavoriteButton: (factUi) => {
+                  context
+                      .read<HomeBloc>()
+                      .add(OnClickFavoriteFactButtonEvent(factUi: factUi))
+                });
+      case HomeContent.messageToSearchFact:
+        return const FactCenterText(text: "Busque um fato");
+      case HomeContent.messageNoFactFound:
+        return const FactCenterText(text: "Fatos nao encontrados");
+    }
   }
 }

@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 
 class SearchFactsSuggestions extends StatelessWidget {
   final List<String> suggestions;
+  final void Function(String) onClickSuggestion;
 
-  const SearchFactsSuggestions({super.key, required this.suggestions});
+  const SearchFactsSuggestions({
+    super.key,
+    required this.suggestions,
+    required this.onClickSuggestion
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +16,9 @@ class SearchFactsSuggestions extends StatelessWidget {
 
     var textButtons = suggestions.map((suggestion) {
       return TextButton(
-          onPressed: () {},
+          onPressed: () {
+            onClickSuggestion.call(suggestion);
+          },
           style: TextButton.styleFrom(
             backgroundColor: theme.colorScheme.primaryContainer,
           ),
