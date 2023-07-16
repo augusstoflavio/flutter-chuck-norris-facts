@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chuck_norris_facts/domain/models/fact.dart';
 import 'package:chuck_norris_facts/domain/models/failure.dart';
 import 'package:chuck_norris_facts/domain/models/search.dart';
@@ -16,7 +18,6 @@ import 'package:side_effect_bloc/side_effect_bloc.dart';
 class HomeBloc extends SideEffectBloc<HomeEvent, HomeState, HomeSideEffect> {
   final SearchFactsUseCase _searchFactsUseCase;
   final DisfavorFactUseCase _disfavorFactUseCase;
-  final FavoriteFactUseCase _favoriteFactUseCase;
 
   HomeBloc(
     this._searchFactsUseCase,
@@ -27,8 +28,8 @@ class HomeBloc extends SideEffectBloc<HomeEvent, HomeState, HomeSideEffect> {
       _handleOnClickSearchButton(emit);
     });
 
-    on<OnReceiveSearchEvent>((event, emit) {
-      _handleOnReceiveSearch(event, emit);
+    on<OnReceiveSearchEvent>((event, emit) async {
+      await _handleOnReceiveSearch(event, emit);
     });
 
     on<OnClickSharedFactButtonEvent>((event, emit) {
@@ -40,13 +41,15 @@ class HomeBloc extends SideEffectBloc<HomeEvent, HomeState, HomeSideEffect> {
     });
   }
 
+  final FavoriteFactUseCase _favoriteFactUseCase;
+
   void _handleOnClickSearchButton(Emitter<HomeState> emit) {
     produceSideEffect(NavigateToSearchScreen());
   }
 
-  void _handleOnReceiveSearch(
-      OnReceiveSearchEvent event, Emitter<HomeState> emit) {
-    _getListOfFacts(event.search, emit);
+  Future<void> _handleOnReceiveSearch(
+      OnReceiveSearchEvent event, Emitter<HomeState> emit) async {
+    await _getListOfFacts(event.search, emit);
   }
 
   void _handleOnClickSharedFactButtonEvent(
@@ -61,22 +64,16 @@ class HomeBloc extends SideEffectBloc<HomeEvent, HomeState, HomeSideEffect> {
 
     Either<Failure, void> result;
     if (currentFactUi.isFavorite) {
-      result = await _disfavorFactUseCase.call(
-          currentFactUi.url
-      );
+      result = await _disfavorFactUseCase.call(currentFactUi.url);
     } else {
-      result = await _favoriteFactUseCase.call(
-          currentFactUi.url
-      );
+      result = await _favoriteFactUseCase.call(currentFactUi.url);
     }
 
     result.fold(
-          (failure) => {
-            _toggleFavoriteFactUi(currentFactUi, emit)
-          },
-          (facts) => {
-            // nothing to do
-          },
+      (failure) => {_toggleFavoriteFactUi(currentFactUi, emit)},
+      (facts) => {
+        // nothing to do
+      },
     );
   }
 
@@ -93,29 +90,26 @@ class HomeBloc extends SideEffectBloc<HomeEvent, HomeState, HomeSideEffect> {
     emit(newState);
   }
 
-  void _getListOfFacts(String search, Emitter<HomeState> emit) async {
+  Future<void> _getListOfFacts(String search, Emitter<HomeState> emit) async {
     emit(state.copyWith(content: HomeContent.loading));
-
-    var factsResult =
-        await _searchFactsUseCase.call(Search(description: search));
-    factsResult.fold(
-      (failure) {
-        emit(state.copyWith(content: HomeContent.listOfFacts));
-        produceSideEffect(
-            ShowFailureDialog(
-              failure: failure,
-              tryAgainEvent: OnClickTryAgainEvent(search: search),
-            )
-        );
-      },
-      (facts) => {_onSearchFactsSuccessfully(facts, emit)},
-    );
+    await _searchFactsUseCase(Search(description: search)).then((factsResult) {
+      factsResult.fold(
+        (failure) {
+          emit(state.copyWith(content: HomeContent.listOfFacts));
+          produceSideEffect(ShowFailureDialog(
+            failure: failure,
+            tryAgainEvent: OnClickTryAgainEvent(search: search),
+          ));
+        },
+        (facts) {
+          _onSearchFactsSuccessfully(facts, emit);
+        },
+      );
+    });
   }
 
   void _onSearchFactsSuccessfully(List<Fact> facts, Emitter<HomeState> emit) {
-    var factsUi = facts
-        .map((fact) => fact.toFactUi())
-        .toList();
+    var factsUi = facts.map((fact) => fact.toFactUi()).toList();
 
     emit(state.copyWith(facts: factsUi, content: HomeContent.listOfFacts));
   }
