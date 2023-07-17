@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 class Fact {
   late final String description;
   late final String url;
