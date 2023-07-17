@@ -7,19 +7,21 @@ import 'package:chuck_norris_facts/domain/models/search.dart';
 import 'package:dartz/dartz.dart';
 
 class FactDataSourceImpl extends FactDataSource {
-  final ChuckNorrisApiService service;
+  final ChuckNorrisApiService chuckNorrisApiService;
 
-  FactDataSourceImpl({required this.service});
+  FactDataSourceImpl({required this.chuckNorrisApiService});
 
   @override
   Future<Either<Failure, List<Fact>>> searchFacts(Search search) async {
-    try {
-      var response = await service.searchFacts(search.description);
-      return Right(response.result.map((factResponse) {
-        return factResponse.toFact();
-      }).toList());
-    } catch (e) {
-      return Left(Failure());
-    }
+    var searchFactsResponse = await chuckNorrisApiService.searchFacts(
+      search.description,
+    );
+    return searchFactsResponse.map(
+      (searchFactResponse) => searchFactResponse.result.map(
+        (searchFactResultResponse) {
+          return searchFactResultResponse.toFact();
+        },
+      ).toList(),
+    );
   }
 }

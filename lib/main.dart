@@ -1,4 +1,5 @@
 import 'package:chuck_norris_facts/data/fact_data_source_impl.dart';
+import 'package:chuck_norris_facts/data/remote/http_client.dart';
 import 'package:chuck_norris_facts/data/remote/chuck_norris_api_service.dart';
 import 'package:chuck_norris_facts/data/remote/chuck_norris_api_service_impl.dart';
 import 'package:chuck_norris_facts/domain/dataSources/fact_data_source.dart';
@@ -21,11 +22,14 @@ import 'package:get_it/get_it.dart';
 
 void main() {
   final getIt = GetIt.instance;
+  getIt.registerSingleton<HttpClient>(
+    HttpClient(dio: _setupDio()),
+  );
   getIt.registerSingleton<ChuckNorrisApiService>(
-    ChuckNorrisApiServiceImpl(dio: _setupDio()),
+    ChuckNorrisApiServiceImpl(httpClient: getIt.get()),
   );
   getIt.registerSingleton<FactDataSource>(
-    FactDataSourceImpl(service: getIt.get()),
+    FactDataSourceImpl(chuckNorrisApiService: getIt.get()),
   );
   getIt.registerSingleton<FactRepository>(
     FactRepositoryImpl(factDataSource: getIt.get()),
