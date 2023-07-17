@@ -7,17 +7,16 @@ import 'package:chuck_norris_facts/presentation/pages/searchFacts/search_facts_s
 import 'package:chuck_norris_facts/presentation/pages/searchFacts/search_facts_state.dart';
 import 'package:side_effect_bloc/side_effect_bloc.dart';
 
-class SearchFactsBloc  extends SideEffectBloc<SearchFactsEvent, SearchFactsState, SearchFactsSideEffect> {
+class SearchFactsBloc extends SideEffectBloc<SearchFactsEvent, SearchFactsState,
+    SearchFactsSideEffect> {
   final GetLastSearchesUseCase _getLastSearchesUseCase;
   final GetRandomSuggestionsUseCase _getRandomSuggestionsUseCase;
 
   SearchFactsBloc(
-      this._getLastSearchesUseCase,
-      this._getRandomSuggestionsUseCase
-  ) : super(SearchFactsState()) {
-
-    on<OnInitScreen>((event, emit) {
-      _handleOnInitScreen(emit);
+      this._getLastSearchesUseCase, this._getRandomSuggestionsUseCase)
+      : super(SearchFactsState()) {
+    on<OnInitScreen>((event, emit) async {
+      await _handleOnInitScreen(emit);
     });
 
     on<OnClickLastSearch>((event, emit) {
@@ -33,75 +32,61 @@ class SearchFactsBloc  extends SideEffectBloc<SearchFactsEvent, SearchFactsState
     });
   }
 
-  void _handleOnInitScreen(Emitter<SearchFactsState> emit) {
-    _getSuggestions(emit);
-    _getLastSearches(emit);
+  Future<void> _handleOnInitScreen(Emitter<SearchFactsState> emit) async {
+    await _getSuggestions(emit);
+    await _getLastSearches(emit);
   }
 
-  void _getSuggestions(Emitter<SearchFactsState> emit) async {
+  Future<void> _getSuggestions(Emitter<SearchFactsState> emit) async {
     emit(state.copyWith(showLoadingSuggestions: true));
 
-    var suggestionsResult = await _getRandomSuggestionsUseCase.call(5);
-    suggestionsResult.fold(
-      (failure) => _onGetRandomSuggestionsFailed(failure, emit),
-      (suggestions) => _onGetRandomSuggestionsSuccessfully(suggestions, emit)
-    );
+    await _getRandomSuggestionsUseCase.call(5).then((suggestionsResult) {
+      suggestionsResult.fold(
+          (failure) => _onGetRandomSuggestionsFailed(failure, emit),
+          (suggestions) =>
+              _onGetRandomSuggestionsSuccessfully(suggestions, emit));
+    });
   }
 
-  void _onGetRandomSuggestionsFailed(Failure failure, Emitter<SearchFactsState> emit) {
+  void _onGetRandomSuggestionsFailed(
+      Failure failure, Emitter<SearchFactsState> emit) {
     emit(state.copyWith(showLoadingSuggestions: false));
 
-    produceSideEffect(
-        ShowFailureDialog(
-          failure: failure,
-          tryAgainEvent: OnClickTryAgainSuggestionsEvent(),
-        )
-    );
+    produceSideEffect(ShowFailureDialog(
+      failure: failure,
+      tryAgainEvent: OnClickTryAgainSuggestionsEvent(),
+    ));
   }
 
   void _onGetRandomSuggestionsSuccessfully(
-      List<String> suggestions,
-      Emitter<SearchFactsState> emit
-  ) {
-    emit(
-      state.copyWith(
-        showLoadingSuggestions: false,
-        suggestions: suggestions
-      )
-    );
+      List<String> suggestions, Emitter<SearchFactsState> emit) {
+    emit(state.copyWith(
+        showLoadingSuggestions: false, suggestions: suggestions));
   }
 
-  void _getLastSearches(Emitter<SearchFactsState> emit) async {
+  Future<void> _getLastSearches(Emitter<SearchFactsState> emit) async {
     emit(state.copyWith(showLoadingLastSearches: true));
 
-    var lastSearchesResult = await _getLastSearchesUseCase.call(10);
-    lastSearchesResult.fold(
-      (failure) => _onGetLastSearchesFailed(failure, emit),
-      (searches) => _onGetLastSearchesSuccessfully(searches, emit)
-    );
+    await _getLastSearchesUseCase(10).then((lastSearchesResult) {
+      lastSearchesResult.fold(
+          (failure) => _onGetLastSearchesFailed(failure, emit),
+          (searches) => _onGetLastSearchesSuccessfully(searches, emit));
+    });
   }
 
   _onGetLastSearchesFailed(Failure failure, Emitter<SearchFactsState> emit) {
     emit(state.copyWith(showLoadingLastSearches: false));
 
-    produceSideEffect(
-        ShowFailureDialog(
-            failure: failure,
-            tryAgainEvent: OnClickTryAgainGetLastSearchesEvent(),
-        )
-    );
+    produceSideEffect(ShowFailureDialog(
+      failure: failure,
+      tryAgainEvent: OnClickTryAgainGetLastSearchesEvent(),
+    ));
   }
 
   _onGetLastSearchesSuccessfully(
-      List<String> searches,
-      Emitter<SearchFactsState> emit
-  ) {
+      List<String> searches, Emitter<SearchFactsState> emit) {
     emit(
-      state.copyWith(
-        showLoadingLastSearches: false,
-        lastSearches: searches
-      )
-    );
+        state.copyWith(showLoadingLastSearches: false, lastSearches: searches));
   }
 
   void _handleOnClickLastSearch(OnClickLastSearch event) {

@@ -17,4 +17,13 @@ class ChuckNorrisApiServiceImpl extends ChuckNorrisApiService {
       return SearchFactsResponse.fromJson(result);
     });
   }
+
+  @override
+  Future<Either<Failure, List<String>>> getCategories() async {
+    return await httpClient.get("/jokes/categories", null, (result) {
+      return (result as List<dynamic>).map((e) {
+        return e as String;
+      }).toList();
+    });
+  }
 }

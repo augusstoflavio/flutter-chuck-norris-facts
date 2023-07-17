@@ -5,4 +5,5 @@ import 'package:dartz/dartz.dart';
 abstract class ChuckNorrisApiService {
 
   Future<Either<Failure, SearchFactsResponse>> searchFacts(String search);
+  Future<Either<Failure, List<String>>> getCategories();
 }

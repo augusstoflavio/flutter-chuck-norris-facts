@@ -14,5 +14,4 @@ class SearchFactsUseCaseImpl extends SearchFactsUseCase {
   Future<Either<Failure, List<Fact>>> call(Search search) {
     return factRepository.searchFacts(search);
   }
-
 }

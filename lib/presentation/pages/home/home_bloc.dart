@@ -48,7 +48,9 @@ class HomeBloc extends SideEffectBloc<HomeEvent, HomeState, HomeSideEffect> {
   }
 
   Future<void> _handleOnReceiveSearch(
-      OnReceiveSearchEvent event, Emitter<HomeState> emit) async {
+    OnReceiveSearchEvent event,
+    Emitter<HomeState> emit,
+  ) async {
     await _getListOfFacts(event.search, emit);
   }
 
