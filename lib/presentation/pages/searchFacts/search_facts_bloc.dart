@@ -1,5 +1,6 @@
 import 'package:bloc/src/bloc.dart';
 import 'package:chuck_norris_facts/domain/models/failure.dart';
+import 'package:chuck_norris_facts/domain/models/search.dart';
 import 'package:chuck_norris_facts/domain/useCases/get_last_searches_use_case.dart';
 import 'package:chuck_norris_facts/domain/useCases/get_random_suggestions_use_case.dart';
 import 'package:chuck_norris_facts/presentation/pages/searchFacts/search_facts_event.dart';
@@ -11,6 +12,8 @@ class SearchFactsBloc extends SideEffectBloc<SearchFactsEvent, SearchFactsState,
     SearchFactsSideEffect> {
   final GetLastSearchesUseCase _getLastSearchesUseCase;
   final GetRandomSuggestionsUseCase _getRandomSuggestionsUseCase;
+
+  static const int maxLastSearch = 8;
 
   SearchFactsBloc(
       this._getLastSearchesUseCase, this._getRandomSuggestionsUseCase)
@@ -42,9 +45,12 @@ class SearchFactsBloc extends SideEffectBloc<SearchFactsEvent, SearchFactsState,
 
     await _getRandomSuggestionsUseCase.call(5).then((suggestionsResult) {
       suggestionsResult.fold(
-          (failure) => _onGetRandomSuggestionsFailed(failure, emit),
-          (suggestions) =>
-              _onGetRandomSuggestionsSuccessfully(suggestions, emit));
+        (failure) => _onGetRandomSuggestionsFailed(failure, emit),
+        (suggestions) => _onGetRandomSuggestionsSuccessfully(
+          suggestions,
+          emit,
+        ),
+      );
     });
   }
 
@@ -67,7 +73,7 @@ class SearchFactsBloc extends SideEffectBloc<SearchFactsEvent, SearchFactsState,
   Future<void> _getLastSearches(Emitter<SearchFactsState> emit) async {
     emit(state.copyWith(showLoadingLastSearches: true));
 
-    await _getLastSearchesUseCase(10).then((lastSearchesResult) {
+    await _getLastSearchesUseCase(maxLastSearch).then((lastSearchesResult) {
       lastSearchesResult.fold(
           (failure) => _onGetLastSearchesFailed(failure, emit),
           (searches) => _onGetLastSearchesSuccessfully(searches, emit));
@@ -84,9 +90,11 @@ class SearchFactsBloc extends SideEffectBloc<SearchFactsEvent, SearchFactsState,
   }
 
   _onGetLastSearchesSuccessfully(
-      List<String> searches, Emitter<SearchFactsState> emit) {
-    emit(
-        state.copyWith(showLoadingLastSearches: false, lastSearches: searches));
+      List<Search> searches, Emitter<SearchFactsState> emit) {
+    emit(state.copyWith(
+      showLoadingLastSearches: false,
+      lastSearches: searches.map((e) => e.description).toList(),
+    ));
   }
 
   void _handleOnClickLastSearch(OnClickLastSearch event) {
