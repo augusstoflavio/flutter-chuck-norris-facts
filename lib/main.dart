@@ -1,8 +1,10 @@
 import 'package:chuck_norris_facts/data/category_data_source_impl.dart';
 import 'package:chuck_norris_facts/data/fact_data_source_impl.dart';
 import 'package:chuck_norris_facts/data/remote/http_client.dart';
-import 'package:chuck_norris_facts/data/remote/chuck_norris_api_service.dart';
-import 'package:chuck_norris_facts/data/remote/chuck_norris_api_service_impl.dart';
+import 'package:chuck_norris_facts/data/remote/service/chuck_norris_api_service.dart';
+import 'package:chuck_norris_facts/data/remote/service/chuck_norris_api_service_impl.dart';
+import 'package:chuck_norris_facts/data/remote/util/connection_status.dart';
+import 'package:chuck_norris_facts/data/remote/util/connection_status_impl.dart';
 import 'package:chuck_norris_facts/domain/dataSources/category_data_source.dart';
 import 'package:chuck_norris_facts/domain/dataSources/fact_data_source.dart';
 import 'package:chuck_norris_facts/domain/repositories/category_repository.dart';
@@ -20,14 +22,19 @@ import 'package:chuck_norris_facts/domain/useCases/get_random_suggestions_use_ca
 import 'package:chuck_norris_facts/domain/useCases/search_facts_use_case.dart';
 import 'package:chuck_norris_facts/domain/useCases/search_facts_use_case_impl.dart';
 import 'package:chuck_norris_facts/presentation/chuck_norris_facts_app.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 void main() {
   final getIt = GetIt.instance;
+
+  getIt.registerSingleton<ConnectionStatus>(
+    ConnectionStatusImpl(connectivity: Connectivity()),
+  );
   getIt.registerSingleton<HttpClient>(
-    HttpClient(dio: _setupDio()),
+    HttpClient(dio: _setupDio(), connectionStatus: getIt.get()),
   );
   getIt.registerSingleton<ChuckNorrisApiService>(
     ChuckNorrisApiServiceImpl(httpClient: getIt.get()),

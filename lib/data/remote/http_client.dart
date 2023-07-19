@@ -1,5 +1,6 @@
 import 'package:chuck_norris_facts/data/remote/failure/api_failure.dart';
 import 'package:chuck_norris_facts/data/remote/failure/no_connection_failure.dart';
+import 'package:chuck_norris_facts/data/remote/util/connection_status.dart';
 import 'package:chuck_norris_facts/domain/models/failure.dart';
 import 'package:chuck_norris_facts/domain/models/generic_failure.dart';
 import 'package:dartz/dartz.dart';
@@ -7,9 +8,11 @@ import 'package:dio/dio.dart';
 
 class HttpClient {
   final Dio dio;
+  final ConnectionStatus connectionStatus;
 
   HttpClient({
     required this.dio,
+    required this.connectionStatus,
   });
 
   Future<Either<Failure, T>> get<T>(
@@ -17,7 +20,8 @@ class HttpClient {
     Map<String, dynamic>? queryParameters,
     T Function(dynamic) responseHandler
   ) async {
-    if (!_hasConnection()) {
+    var hasConnection = await _hasConnection();
+    if (!hasConnection) {
       return Left(NoConnectionFailure());
     }
 
@@ -35,7 +39,7 @@ class HttpClient {
     }
   }
 
-  bool _hasConnection() {
-    return true;
+  Future<bool> _hasConnection() async {
+    return await connectionStatus.isAvailable();
   }
 }
