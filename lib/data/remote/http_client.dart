@@ -22,7 +22,7 @@ class HttpClient {
   ) async {
     var hasConnection = await _hasConnection();
     if (!hasConnection) {
-      return Left(NoConnectionFailure());
+      return const Left(NoConnectionFailure());
     }
 
     try {
@@ -33,9 +33,15 @@ class HttpClient {
 
       return Right(responseHandler(result.data));
     } on DioException catch (e) {
-      return Left(ApiFailure());
+      return Left(
+          ApiFailure(
+              apiErrorCode: e.response?.statusCode ?? 0,
+              apiErrorMessage: e.message ?? "",
+              exception: e,
+          )
+      );
     } on Exception catch (e) {
-      return Left(GenericFailure(error: e));
+      return Left(GenericFailure(exception: e));
     }
   }
 

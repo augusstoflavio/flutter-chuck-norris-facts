@@ -1,4 +1,7 @@
+import 'package:chuck_norris_facts/data/remote/failure/api_failure.dart';
+import 'package:chuck_norris_facts/data/remote/failure/no_connection_failure.dart';
 import 'package:chuck_norris_facts/domain/models/failure.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 extension DialogExtensions on BuildContext {
@@ -7,13 +10,8 @@ extension DialogExtensions on BuildContext {
       context: this,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Sorry, we had a problem.'),
-          content: const Text(
-            'A dialog is a type of modal window that\n'
-            'appears in front of app content to\n'
-            'provide critical information, or prompt\n'
-            'for a decision to be made.',
-          ),
+          title: Text(_getTitleByFailure(failure)),
+          content: Text(_getMessageByFailure(failure)),
           actions: <Widget>[
             TextButton(
               style: TextButton.styleFrom(
@@ -38,5 +36,23 @@ extension DialogExtensions on BuildContext {
         );
       },
     );
+  }
+
+  String _getTitleByFailure(Failure failure) {
+    if (failure is NoConnectionFailure) {
+      return "No connection";
+    } else {
+      return "Sorry, we had a problem.";
+    }
+  }
+
+  String _getMessageByFailure(Failure failure) {
+    if (failure is NoConnectionFailure) {
+      return "Please check your connection and try again.";
+    } if (failure is ApiFailure && kDebugMode) {
+      return failure.apiErrorMessage;
+    } else {
+      return "We had a problem, please try again later.";
+    }
   }
 }

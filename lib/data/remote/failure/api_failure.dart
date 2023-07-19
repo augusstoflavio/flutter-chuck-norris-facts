@@ -1,5 +1,12 @@
 import 'package:chuck_norris_facts/domain/models/failure.dart';
 
 class ApiFailure extends Failure {
-  // TODO add error code
+  final int apiErrorCode;
+  final String apiErrorMessage;
+
+  ApiFailure({
+    required this.apiErrorCode,
+    required this.apiErrorMessage,
+    required super.exception
+  });
 }
