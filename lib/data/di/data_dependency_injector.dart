@@ -8,7 +8,7 @@ import 'package:chuck_norris_facts/data/remote/service/chuck_norris_api_service_
 import 'package:chuck_norris_facts/data/remote/util/connection_status.dart';
 import 'package:chuck_norris_facts/data/remote/util/connection_status_impl.dart';
 import 'package:chuck_norris_facts/data/search_data_source_impl.dart';
-import 'package:chuck_norris_facts/dio/dependency_injector.dart';
+import 'package:chuck_norris_facts/di/dependency_injector.dart';
 import 'package:chuck_norris_facts/domain/dataSources/category_local_data_source.dart';
 import 'package:chuck_norris_facts/domain/dataSources/category_remote_data_source.dart';
 import 'package:chuck_norris_facts/domain/dataSources/fact_data_source.dart';

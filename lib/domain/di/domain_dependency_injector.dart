@@ -1,4 +1,4 @@
-import 'package:chuck_norris_facts/dio/dependency_injector.dart';
+import 'package:chuck_norris_facts/di/dependency_injector.dart';
 import 'package:chuck_norris_facts/domain/repositories/category_repository.dart';
 import 'package:chuck_norris_facts/domain/repositories/category_repository_impl.dart';
 import 'package:chuck_norris_facts/domain/repositories/fact_repository.dart';

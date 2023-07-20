@@ -1,6 +1,6 @@
 import 'package:chuck_norris_facts/data/di/data_dependency_injector.dart';
 import 'package:chuck_norris_facts/data/launcher/data_launcher.dart';
-import 'package:chuck_norris_facts/dio/dependency_injector.dart';
+import 'package:chuck_norris_facts/di/dependency_injector.dart';
 import 'package:chuck_norris_facts/domain/di/domain_dependency_injector.dart';
 import 'package:chuck_norris_facts/launcher/launcher.dart';
 import 'package:chuck_norris_facts/presentation/chuck_norris_facts_app.dart';
