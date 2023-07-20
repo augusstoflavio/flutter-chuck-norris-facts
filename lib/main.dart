@@ -1,4 +1,5 @@
-import 'package:chuck_norris_facts/data/category_data_source_impl.dart';
+import 'package:chuck_norris_facts/data/category_local_data_source_impl.dart';
+import 'package:chuck_norris_facts/data/category_remote_data_source_impl.dart';
 import 'package:chuck_norris_facts/data/fact_data_source_impl.dart';
 import 'package:chuck_norris_facts/data/local/chuck_norris_database.dart';
 import 'package:chuck_norris_facts/data/remote/http_client.dart';
@@ -7,7 +8,8 @@ import 'package:chuck_norris_facts/data/remote/service/chuck_norris_api_service_
 import 'package:chuck_norris_facts/data/remote/util/connection_status.dart';
 import 'package:chuck_norris_facts/data/remote/util/connection_status_impl.dart';
 import 'package:chuck_norris_facts/data/search_data_source_impl.dart';
-import 'package:chuck_norris_facts/domain/dataSources/category_data_source.dart';
+import 'package:chuck_norris_facts/domain/dataSources/category_local_data_source.dart';
+import 'package:chuck_norris_facts/domain/dataSources/category_remote_data_source.dart';
 import 'package:chuck_norris_facts/domain/dataSources/fact_data_source.dart';
 import 'package:chuck_norris_facts/domain/dataSources/search_data_source.dart';
 import 'package:chuck_norris_facts/domain/repositories/category_repository.dart';
@@ -26,6 +28,7 @@ import 'package:chuck_norris_facts/domain/useCases/get_random_suggestions_use_ca
 import 'package:chuck_norris_facts/domain/useCases/get_random_suggestions_use_case_impl.dart';
 import 'package:chuck_norris_facts/domain/useCases/search_facts_use_case.dart';
 import 'package:chuck_norris_facts/domain/useCases/search_facts_use_case_impl.dart';
+import 'package:chuck_norris_facts/domain/useCases/sync_categories_use_case_impl.dart';
 import 'package:chuck_norris_facts/presentation/chuck_norris_facts_app.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
@@ -50,8 +53,11 @@ void main() async {
     ChuckNorrisApiServiceImpl(httpClient: getIt.get()),
   );
 
-  getIt.registerSingleton<CategoryDataSource>(
-    CategoryDataSourceImpl(chuckNorrisApiService: getIt.get()),
+  getIt.registerSingleton<CategoryRemoteDataSource>(
+    CategoryRemoteDataSourceImpl(chuckNorrisApiService: getIt.get()),
+  );
+  getIt.registerSingleton<CategoryLocalDataSource>(
+    CategoryLocalDataSourceImpl(categoryDao: database.categoryDao),
   );
   getIt.registerSingleton<FactDataSource>(
     FactDataSourceImpl(chuckNorrisApiService: getIt.get()),
@@ -64,7 +70,10 @@ void main() async {
     FactRepositoryImpl(factDataSource: getIt.get()),
   );
   getIt.registerSingleton<CategoryRepository>(
-    CategoryRepositoryImpl(categoryDataSource: getIt.get()),
+    CategoryRepositoryImpl(
+      categoryLocalDataSource: getIt.get(),
+      categoryRemoteDataSource: getIt.get(),
+    ),
   );
   getIt.registerSingleton<SearchRepository>(
     SearchRepositoryImpl(searchDataSource: getIt.get()),
@@ -89,6 +98,9 @@ void main() async {
   );
 
   runApp(const ChuckNorrisFactsApp());
+
+  var sy = SyncCategoriesUseCaseImpl(categoryRepository: getIt.get());
+  await sy.call();
 }
 
 Dio _setupDio() {

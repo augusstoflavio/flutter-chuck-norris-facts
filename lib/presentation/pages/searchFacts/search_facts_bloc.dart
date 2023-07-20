@@ -14,6 +14,7 @@ class SearchFactsBloc extends SideEffectBloc<SearchFactsEvent, SearchFactsState,
   final GetRandomSuggestionsUseCase _getRandomSuggestionsUseCase;
 
   static const int maxLastSearch = 8;
+  static const int maxSuggestions = 8;
 
   SearchFactsBloc(
       this._getLastSearchesUseCase, this._getRandomSuggestionsUseCase)
@@ -43,7 +44,9 @@ class SearchFactsBloc extends SideEffectBloc<SearchFactsEvent, SearchFactsState,
   Future<void> _getSuggestions(Emitter<SearchFactsState> emit) async {
     emit(state.copyWith(showLoadingSuggestions: true));
 
-    await _getRandomSuggestionsUseCase.call(5).then((suggestionsResult) {
+    await _getRandomSuggestionsUseCase
+        .call(maxSuggestions)
+        .then((suggestionsResult) {
       suggestionsResult.fold(
         (failure) => _onGetRandomSuggestionsFailed(failure, emit),
         (suggestions) => _onGetRandomSuggestionsSuccessfully(

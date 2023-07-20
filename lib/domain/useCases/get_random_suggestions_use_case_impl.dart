@@ -10,6 +10,6 @@ class GetRandomSuggestionsUseCaseImpl extends GetRandomSuggestionsUseCase {
 
   @override
   Future<Either<Failure, List<String>>> call(int limit) {
-    return categoryRepository.getCategories(limit);
+    return categoryRepository.getRandomCategories(limit);
   }
 }
